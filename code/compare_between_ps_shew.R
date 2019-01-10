@@ -1,0 +1,1 @@
+#the goal of this script is to compare genes 

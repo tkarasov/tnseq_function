@@ -1,0 +1,550 @@
+---
+title: "compare_within"
+author: "Talia_Karasov"
+date: "5/15/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{R; echo = FALSE}
+library(stringr)
+library(gplots)
+
+my.pairs <- function (x, labels, panel = points, ..., lower.panel = panel, 
+          upper.panel = panel, diag.panel = NULL, text.panel = textPanel, 
+          label.pos = 0.5 + has.diag/3, line.main = 3, cex.labels = NULL, 
+          font.labels = 1, row1attop = TRUE, gap = 1, log = "", xlim=NULL, ylim=NULL) 
+{
+  if (doText <- missing(text.panel) || is.function(text.panel)) 
+    textPanel <- function(x = 0.5, y = 0.5, txt, cex, font) text(x, 
+                                                                 y, txt, cex = cex, font = font)
+  localAxis <- function(side, x, y, xpd, bg, col = NULL, main, 
+                        oma, ...) {
+    xpd <- NA
+    if (side%%2L == 1L && xl[j]) 
+      xpd <- FALSE
+    if (side%%2L == 0L && yl[i]) 
+      xpd <- FALSE
+    if (side%%2L == 1L) 
+      Axis(x, side = side, xpd = xpd, ...)
+    else Axis(y, side = side, xpd = xpd, ...)
+  }
+  localPlot <- function(..., main, oma, font.main, cex.main) plot(...)
+  localLowerPanel <- function(..., main, oma, font.main, cex.main) lower.panel(...)
+  localUpperPanel <- function(..., main, oma, font.main, cex.main) upper.panel(...)
+  localDiagPanel <- function(..., main, oma, font.main, cex.main) diag.panel(...)
+  dots <- list(...)
+  nmdots <- names(dots)
+  if (!is.matrix(x)) {
+    x <- as.data.frame(x)
+    for (i in seq_along(names(x))) {
+      if (is.factor(x[[i]]) || is.logical(x[[i]])) 
+        x[[i]] <- as.numeric(x[[i]])
+      if (!is.numeric(unclass(x[[i]]))) 
+        stop("non-numeric argument to 'pairs'")
+    }
+  }
+  else if (!is.numeric(x)) 
+    stop("non-numeric argument to 'pairs'")
+  panel <- match.fun(panel)
+  if ((has.lower <- !is.null(lower.panel)) && !missing(lower.panel)) 
+    lower.panel <- match.fun(lower.panel)
+  if ((has.upper <- !is.null(upper.panel)) && !missing(upper.panel)) 
+    upper.panel <- match.fun(upper.panel)
+  if ((has.diag <- !is.null(diag.panel)) && !missing(diag.panel)) 
+    diag.panel <- match.fun(diag.panel)
+  if (row1attop) {
+    tmp <- lower.panel
+    lower.panel <- upper.panel
+    upper.panel <- tmp
+    tmp <- has.lower
+    has.lower <- has.upper
+    has.upper <- tmp
+  }
+  nc <- ncol(x)
+  if (nc < 2) 
+    stop("only one column in the argument to 'pairs'")
+  if (doText) {
+    if (missing(labels)) {
+      labels <- colnames(x)
+      if (is.null(labels)) 
+        labels <- paste("var", 1L:nc)
+    }
+    else if (is.null(labels)) 
+      doText <- FALSE
+  }
+  oma <- if ("oma" %in% nmdots) 
+    dots$oma
+  main <- if ("main" %in% nmdots) 
+    dots$main
+  if (is.null(oma)) 
+    oma <- c(4, 4, if (!is.null(main)) 6 else 4, 4)
+  opar <- par(mfrow = c(nc, nc), mar = rep.int(gap/2, 4), oma = oma)
+  on.exit(par(opar))
+  dev.hold()
+  on.exit(dev.flush(), add = TRUE)
+  xl <- yl <- logical(nc)
+  if (is.numeric(log)) 
+    xl[log] <- yl[log] <- TRUE
+  else {
+    xl[] <- grepl("x", log)
+    yl[] <- grepl("y", log)
+  }
+  for (i in if (row1attop) 
+    1L:nc
+       else nc:1L) for (j in 1L:nc) {
+         l <- paste0(ifelse(xl[j], "x", ""), ifelse(yl[i], "y", 
+                                                   ""))
+         if (is.null(xlim) & is.null(ylim))
+         localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE, 
+                   type = "n", ..., log = l)
+         if (is.null(xlim) & !is.null(ylim))
+         localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE, 
+                   type = "n", ..., log = l, ylim=ylim[j,i,])
+         if (!is.null(xlim) & is.null(ylim))
+         localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE, 
+                   type = "n", ..., log = l, xlim = xlim[j,i,])
+         if (!is.null(xlim) & !is.null(ylim))
+         localPlot(x[, j], x[, i], xlab = "", ylab = "", axes = FALSE, 
+                   type = "n", ..., log = l, xlim = xlim[j,i,], ylim=ylim[j,i,])
+
+         if (i == j || (i < j && has.lower) || (i > j && has.upper)) {
+           box()
+           if (i == 1 && (!(j%%2L) || !has.upper || !has.lower)) 
+             localAxis(1L + 2L * row1attop, x[, j], x[, i], 
+                       ...)
+           if (i == nc && (j%%2L || !has.upper || !has.lower)) 
+             localAxis(3L - 2L * row1attop, x[, j], x[, i], 
+                       ...)
+           if (j == 1 && (!(i%%2L) || !has.upper || !has.lower)) 
+             localAxis(2L, x[, j], x[, i], ...)
+           if (j == nc && (i%%2L || !has.upper || !has.lower)) 
+             localAxis(4L, x[, j], x[, i], ...)
+           mfg <- par("mfg")
+           if (i == j) {
+             if (has.diag) 
+               localDiagPanel(as.vector(x[, i]), ...)
+             if (doText) {
+               par(usr = c(0, 1, 0, 1))
+               if (is.null(cex.labels)) {
+                 l.wid <- strwidth(labels, "user")
+                 cex.labels <- max(0.8, min(2, 0.9/max(l.wid)))
+               }
+               xlp <- if (xl[i]) 
+                 10^0.5
+               else 0.5
+               ylp <- if (yl[j]) 
+                 10^label.pos
+               else label.pos
+               text.panel(xlp, ylp, labels[i], cex = cex.labels, 
+                          font = font.labels)
+             }
+           }
+           else if (i < j) 
+             localLowerPanel(as.vector(x[, j]), as.vector(x[, 
+                                                            i]), ...)
+           else localUpperPanel(as.vector(x[, j]), as.vector(x[, 
+                                                               i]), ...)
+           if (any(par("mfg") != mfg)) 
+             stop("the 'panel' function made a new plot")
+         }
+         else par(new = FALSE)
+       }
+  if (!is.null(main)) {
+    font.main <- if ("font.main" %in% nmdots) 
+      dots$font.main
+    else par("font.main")
+    cex.main <- if ("cex.main" %in% nmdots) 
+      dots$cex.main
+    else par("cex.main")
+    mtext(main, 3, line.main, outer = TRUE, at = 0.5, cex = cex.main, 
+          font = font.main)
+  }
+  invisible(NULL)
+}
+
+# Customize upper panel
+upper.panel<-function(x, y){points(x,y, pch = 20, cex =0.1, col = "#00AFBB")}
+
+
+
+#this function extracts the numbers only from a string
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
+
+
+setwd("~/work_main/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/")
+rsquared=function(col1, col2){
+  mod1 = lm(col2~col1)
+  modsum = summary(mod1)
+  r2 = modsum$adj.r.squared
+  mylabel = bquote(italic(R)^2 == .(format(r2, digits = 3)))
+  text(x = (max(col1)-2), y = (max(col2)-1), labels = mylabel, col="RED")
+}
+
+return_column_name<-function(fit_table, column){
+  #this function takes a fitness table and column and feeds back name of column and column
+  col=fit_table[,grepl(column, colnames(fit_table))]
+  return(col)
+}
+
+return_conditions<-function(search_list, source_list){
+  found=list()
+  i=0
+  for(rec in search_list){
+    found_item=source_list[grepl(rec, source_list)]
+    for(item in found_item){
+      i=i+1
+      found[[i]]=item
+    }
+  }
+  return(found)
+}
+      
+
+iterate_cond_list<-function(cond_list, fit_table, cond_names){
+  pairwise_mat = matrix(ncol=length(cond_list), nrow=length(cond_list))
+  colnames(pairwise_mat)=cond_names
+  rownames(pairwise_mat) = cond_names
+  for(i in 1:length(cond_list)){
+    for(z in 1:length(cond_list)){
+      h1 = return_column_name(fit_table, cond_list[i])
+      h2 = return_column_name(fit_table, cond_list[z])
+      h1_h2 = cor.test(h1, h2, na.rm=T)$estimate
+      print(h1_h2)
+      pairwise_mat[i,z]=h1_h2
+    }
+  }
+  return(pairwise_mat)
+}
+
+
+heatmap_cond<-function(corr_mat){
+  par(oma=c(10,6,6,10))
+#heatplot(pseudo1_all_matrix)
+  my_heatmap=heatmap.2(corr_mat, col=rev(colorRampPalette(brewer.pal(10, "RdBu"))(256)),
+          margins=c(15,15), trace="none",
+          scale="none",
+          symbreaks = TRUE)
+  return(my_heatmap)
+}
+
+file.names <- list.files(path = "~/work_main/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/")
+# read in each file in the directory naming it with the interesting bit of the filename
+genome_list = c(length(file.names))
+for(i in 1:length(file.names)){
+  start.stripped.i <- unlist(strsplit(x = file.names[i], split = 'organism_'))[2]
+  obj.name.i <- unlist(strsplit(x = start.stripped.i, split = '\\.'))[1] # escape character before . so it's not treated as a wildcard 
+  X.i <- read.csv(file.names[i], sep="\t")
+  assign(x = obj.name.i, value = X.i)
+  genome_list[i]=obj.name.i
+  rm(list = c('start.stripped.i', 'obj.name.i', 'X.i'))
+  gc()
+}
+
+#read in table with condition info
+conditions = read.table("~/Google Drive/tnseq_general/all_conditions.txt", fill = TRUE, sep="\t", header=T)
+
+#Pseudomons N1B4
+pseudo1_N1B4_name = "Pseudomonas fluorescens FW300-N1B4"
+pseudo1_cond = conditions[conditions$Organism==pseudo1_N1B4_name,]
+pseudo1_all_matrix = iterate_cond_list(pseudo1_cond$Name,pseudo1_N1B4, pseudo1_cond$Description )
+
+pdf("Pfl_N1B4_allcond_heatmap.pdf", height=20, width=20)
+par(oma=c(10,6,6,10))
+#heatplot(pseudo1_all_matrix)
+heatmap.2(pseudo1_all_matrix, col=rev(colorRampPalette(brewer.pal(10, "RdBu"))(256)),
+          margins=c(4,7), trace="none",
+          scale="none",
+          symbreaks = TRUE)
+dev.off()
+
+ribosome=c("Spectinomycin", "Tetracycline", "Gentamicin", "Carbenicillin")
+keep=unlist(return_conditions(ribosome, colnames(pseudo1_all_matrix)))
+keep_mat=pseudo1_all_matrix[keep, keep]
+par(oma=c(10,6,6,10))
+heatmap.2(keep_mat, col=rev(colorRampPalette(brewer.pal(10, "RdBu"))(256)),
+          margins=c(4,7), trace="none",
+          scale="none",
+          symbreaks = TRUE)
+
+pdf("Pfl_N1B4_ribosomal_antib_heatmap.pdf", height=20, width=20)
+heatmap_cond(keep_mat)
+dev.off()
+#pseudoN1B4
+
+#I want to compare across levels
+#find duplicated conditions
+strain_cond = pseudo1_cond
+strain_cond$level = numextract(strain_cond$Description)
+strain_all_matrix = pseudo1_all_matrix
+strain_dup = strain_cond$Condition[which(duplicated(strain_cond$Condition))]
+keep_descr = strain_cond[strain_cond$Condition %in% strain_dup,]
+keep_col = which(colnames(strain_all_matrix) %in% keep_descr$Description)
+keep_mat = strain_all_matrix[c(keep_col), c(keep_col)]
+par(oma=c(10,6,6,10))
+heatmap.2(keep_mat, col=rev(colorRampPalette(brewer.pal(10, "RdBu"))(256)),
+          margins=c(4,7), trace="none",
+          scale="none",
+          symbreaks = TRUE)
+
+#plot all pairwise comparisons
+dup_conditions = strain_cond$Condition[which(duplicated(pseudo1_cond$Condition))]
+pairing = 
+for(condition in dup_conditions){
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+ecoli_k12_name = "Escherichia coli BW25113"
+k12_cond = conditions[conditions$Organism==ecoli_k12_name,]
+k12_all_matrix = iterate_cond_list(k12_cond$Name,Keio, k12_cond$Condition )
+
+pdf("ecoli_k12_allcond_heatmap.pdf", height=20, width=20)
+par(oma=c(10,6,6,10))
+#heatplot(pseudo1_all_matrix)
+heatmap.2(k12_all_matrix, col=rev(colorRampPalette(brewer.pal(10, "RdBu"))(256)),
+          margins=c(4,7), trace="none",
+          scale="none",
+          symbreaks = TRUE)
+dev.off()
+```
+
+
+#pseudo1_N1B4 #spectinomycin, "Tetracycline", "Cycline Hylate", "Rifampicin", "Nalidixic acid", "Gentamicin", "Fusidic acid"
+
+tetracycline = blocks attachment of charge aminoacyl-tRNA to the A site on the ribosome
+cycline hylate = doxycycline, is a tetracycline antibiotic
+
+gentamicin = binds the 30S subunit of the ribosome, interrupting protein synthesis
+
+spectinomycin = binds to the 30S subunit of the bacterial ribosome
+
+fusidic acid = inhibits the translocation of ribosome on protein
+
+rifampicin = inhibits bacterial DNA-dependent RNA synthesis by inhibiting bacterial DNA-dependent RNA polymerase
+
+nalidixic acid = inhbits gyrase or DNA synthesis
+
+
+
+
+```{R}
+
+library(Deducer)
+# Correlation panel
+panel.cor <- function(x, y){
+    usr <- par("usr"); on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- round(cor(x, y), digits=2)
+    txt <- paste0("R = ", r)
+    cex.cor <- 1#/strwidth(txt)
+    text(0.5, 0.5, txt, cex = cex.cor )
+}
+# Customize upper panel
+upper.panel<-function(x, y){
+  points(x,y, pch = 19)
+}
+
+pairs.panels(which_ab, 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+             )
+```
+
+```{R}
+#N1B4
+of_interest = pseudo1_N1B4
+antibiotics = c("set3IT015", "set3IT017", "set3IT016", "set3IT018", "set4IT051", "set3IT038", "set3IT036", "set3IT011", "set4IT050" )
+
+nitrogen = c("set5IT005", "set5IT010", "set4IT094", "set5IT007", "set5IT009")
+
+carbon = c("set4IT078", "set4IT083", "set4IT076", "set1IT006", "set1IT022")
+
+which_ab = of_interest[,grep(paste(antibiotics, collapse='|'), colnames(of_interest), ignore.case=TRUE)][, c("set3IT011.Doxycycline.hyclate.0.0001.mg.ml", "set3IT015.Tetracycline.0.0004.mg.ml", "set3IT016.Spectinomycin.0.025.mg.ml", "set3IT017.Spectinomycin.0.05.mg.ml", "set3IT038.Gentamicin.0.001.mg.ml")]
+
+#[, c("set3IT011.Doxycycline.hyclate.0.0001.mg.ml", "set3IT015.Tetracycline.0.0004.mg.ml", "set3IT016.Spectinomycin.0.025.mg.ml", "set3IT017.Spectinomycin.0.05.mg.ml", "set3IT038.Gentamicin.0.001.mg.ml","set4IT050.Fusidic.0.0625.mg.ml", "set4IT051.Fusidic.0.125.mg.ml", "set3IT018.Rifampicin.0.004.mg.ml", "set3IT036.Nalidixic.0.004.mg.ml")]
+
+which_nitro = of_interest[,grep(paste(nitrogen, collapse='|'), colnames(of_interest), ignore.case=TRUE)]
+
+which_carbo = of_interest[,grep(paste(carbon, collapse='|'), colnames(of_interest), ignore.case=TRUE)]
+pdf("~/Google Drive/tnseq_general/figures/nitro_carbon_ab_N1B4_pseudo.pdf")
+#ggcorplot(cor.matrix(which_ab), which_ab, type="points", cor_text_limits=c(3,3), var_text_size = 1) + theme_bw()
+
+#ggcorplot(cor.matrix(which_carbo), which_carbo, type="points", cor_text_limits=c(3,3), var_text_size = 1) + theme_bw()
+
+#ggcorplot(cor.matrix(which_nitro), which_nitro, type="points", cor_text_limits=c(3,3), var_text_size = 1) + theme_bw()
+
+
+# Create the plot
+my.xlim <- array(0, dim=c(9,9,2))
+my.xlim[,,1] = -5
+my.xlim[,,2] = 5
+my.pairs(which_ab, 
+         lower.panel = panel.cor,
+         upper.panel = upper.panel, xlim = my.xlim, ylim = my.xlim )
+
+my.pairs(which_nitro, 
+         lower.panel = panel.cor,
+         upper.panel = upper.panel, xlim = my.xlim, ylim = my.xlim )
+
+my.pairs(which_carbo, 
+         lower.panel = panel.cor,
+         upper.panel = upper.panel, xlim = my.xlim, ylim = my.xlim )
+
+
+dev.off()
+```
+
+
+
+keio
+"set2IT049.Bacitracin.0.5.mg.ml"                      
+"set2IT050.Bacitracin.1.mg.ml"                        
+"set2IT051.Fusidic.0.03.mg.ml"                        
+"set2IT052.Fusidic.0.1.mg.ml"                         
+"set2IT053.Dimethyl.Sulfoxide.7.5.vol."               
+"set2IT054.Dimethyl.Sulfoxide.10.vol."                
+"set2IT056.Chloramphenicol.0.001.mg.ml"               
+"set2IT057.Chloramphenicol.0.0025.mg.ml"              
+"set2IT058.Chloramphenicol.0.005.mg.ml"               
+"set2IT059.Tetracycline.0.0004.mg.ml"                 
+"set2IT060.Tetracycline.0.0008.mg.ml"                 
+"set2IT062.Spectinomycin.0.00625.mg.ml"               
+"set2IT063.Spectinomycin.0.0125.mg.ml"                
+"set2IT064.Carbenicillin.0.004.mg.ml"                 
+"set2IT065.Carbenicillin.0.008.mg.ml"    
+
+Carbenicillin = inhibits cell wall syntehsis. Bacitracin also.
+
+Chloramphenicol = "Chloramphenicol is a bacteriostatic by inhibiting protein synthesis. It prevents protein chain elongation by inhibiting the peptidyl transferase activity of the bacterial ribosome. It specifically binds to A2451 and A2452 residues[36] in the 23S rRNA of the 50S ribosomal subunit, preventing peptide bond formation"
+
+fusidic acid = inhibits the translocation of ribosome on protein
+
+```{R}
+#Ecoli K12
+of_interest = Keio
+antibiotics = c("set2IT050.Bacitracin.1.mg.ml", "set2IT052.Fusidic.0.1.mg.ml", "set2IT057.Chloramphenicol.0.0025.mg.ml", "set2IT060.Tetracycline.0.0008.mg.ml" , "set2IT063.Spectinomycin.0.0125.mg.ml", "set2IT065.Carbenicillin.0.008.mg.ml")
+
+carbon = c("set1IT005", "set1IT010", "set1IT007", "set1IT007", "set1IT009")
+
+nitrogen = c("set1IT078", "set1IT083", "set1IT076", "set1IT084", "set1IT094")
+
+which_ab = of_interest[,grep(paste(antibiotics, collapse='|'), colnames(of_interest), ignore.case=TRUE)]
+
+which_nitro = of_interest[,grep(paste(nitrogen, collapse='|'), colnames(of_interest), ignore.case=TRUE)]
+
+which_carbo = of_interest[,grep(paste(carbon, collapse='|'), colnames(of_interest), ignore.case=TRUE)]
+my.xlim <- array(0, dim=c(9,9,2))
+my.xlim[,,1] = -5
+my.xlim[,,2] = 5
+pdf("~/Google Drive/tnseq_general/figures/nitro_carbon_ab_k12.pdf")
+my.pairs(which_ab, 
+         lower.panel = panel.cor,
+         upper.panel = upper.panel, xlim = my.xlim, ylim = my.xlim )
+
+my.pairs(which_nitro, 
+         lower.panel = panel.cor,
+         upper.panel = upper.panel, xlim = my.xlim, ylim = my.xlim )
+
+my.pairs(which_carbo, 
+         lower.panel = panel.cor,
+         upper.panel = upper.panel, xlim = my.xlim, ylim = my.xlim )
+
+
+dev.off()
+```
+
+Let's focus on a comparison in keio that should have some overlap. Which genes overlap and which don't
+
+spectinomycin = binds to the 30S subunit of the bacterial ribosome
+fusidic acid =
+```{R}
+fus ="set2IT052.Fusidic.0.1.mg.ml"
+spec ="set2IT063.Spectinomycin.0.0125.mg.ml"
+
+pdf("~/Google Drive/tnseq_general/figures/k12_fusidic_spec.pdf")
+ggplot(data=Keio, aes(x=set2IT052.Fusidic.0.1.mg.ml, y=set2IT063.Spectinomycin.0.0125.mg.ml)) +theme_bw() + geom_point() + geom_hline(yintercept = -1, linetype = 'dashed', color ="RED") +geom_vline(xintercept = -1, linetype = 'dashed', color ="RED")
+dev.off()
+
+
+
+write.table(spec_only[,c("geneName","locusID")], "~/work_main/abt6_projects9/tnseq/data/connectome_data/ecoli_DH10B_K12/spec_only.txt")
+write.table(fus_only[,c("geneName","locusID")], "~/work_main/abt6_projects9/tnseq/data/connectome_data/ecoli_DH10B_K12/fus_only.txt")
+write.table(fus_and_spec[,c("geneName","locusID")], "~/work_main/abt6_projects9/tnseq/data/connectome_data/ecoli_DH10B_K12/fus_and_spec.txt")
+
+#read in locus mapping 
+locus_map = read.table("~/work_main/abt6_projects9/tnseq/data/connectome_data/ecoli_DH10B_K12/k12_dir/kei_k12_blast.out", header=F)
+locus_map$V2 = strsplit(locus_map$V2, "|")[2]
+
+#cog_map = read.table("~/work_main/abt6_projects9/tnseq/data/connectome_data/ecoli_DH10B_K12/COG.mappings.v10.5.txt", header=F, sep="\t")
+
+#cog_locus = merge(locus_map[,c(1,2,3)], cog_map, by.x = "V2", by.y =1)
+#cog_locus$V1 = gsub("Keio:", "", cog_locus$V1)
+#fitness_merge = merge(Keio, cog_locus, by.x = "locusID", by.y = "V1")
+
+#fus_only = fitness_merge[fitness_merge$"set2IT052.Fusidic.0.1.mg.ml"<=(-1) & fitness_merge$"set2IT063.Spectinomycin.0.0125.mg.ml">(-.5),][,c("geneName","locusID","set2IT063.Spectinomycin.0.0125.mg.ml","set2IT052.Fusidic.0.1.mg.ml", "COG0001" )]
+
+#spec_only = fitness_merge[fitness_merge$"set2IT052.Fusidic.0.1.mg.ml">(-.5) & fitness_merge$"set2IT063.Spectinomycin.0.0125.mg.ml"<=(-1),][,c("geneName","locusID","set2IT063.Spectinomycin.0.0125.mg.ml","set2IT052.Fusidic.0.1.mg.ml", "COG0001" )]
+
+#fus_and_spec = fitness_merge[fitness_merge$"set2IT052.Fusidic.0.1.mg.ml"<=(-1) & fitness_merge$"set2IT063.Spectinomycin.0.0125.mg.ml"<=(-1),][,c("geneName","locusID","set2IT063.Spectinomycin.0.0125.mg.ml","set2IT052.Fusidic.0.1.mg.ml", "COG0001" )]
+
+
+#download GO ids from here: https://www.uniprot.org/uniprot/?query=yourlist:M2018070483C3DD8CE55183C76102DC5D3A26728B209283R&sort=yourlist:M2018070483C3DD8CE55183C76102DC5D3A26728B209283R
+
+
+
+```
+
+```{R}
+#modeling
+
+
+fit <- lm(set2IT052.Fusidic.0.1.mg.ml~set2IT063.Spectinomycin.0.0125.mg.ml  + set2IT060.Tetracycline.0.0008.mg.ml + set2IT058.Chloramphenicol.0.005.mg.ml + set2IT033.Doxycycline.hyclate.0.001.mg.ml, data=Keio)
+
+fus_val = data.frame(Keio$set2IT052.Fusidic.0.1.mg.ml)
+fus_val$locusID = Keio$locusID
+fus_val$pred = predict.lm(fit)
+fus_val$resid = residuals(fit)
+
+ggplot(data=fus_val, aes(x=pred, y=Keio.set2IT052.Fusidic.0.1.mg.ml)) + geom_point() + theme_bw() + xlab("Predicted Fitness Value (from Ribosome-targeting antibiotics)") + ylab("Observed Fitness Value for Fusidic Acid") 
+
+
+ggplot(data=fus_val, aes(y=resid, x=Keio.set2IT052.Fusidic.0.1.mg.ml)) + geom_point() + theme_bw() + ylab("Residuals in prediction of Fusidic Acid") + xlab("Observed Fitness Value for Fusidic Acid") 
+
+
+#which genes have the worst fitted vs residuals?
+fus_val_neg1 = fus_val[fus_val$resid<(-1),]
+locus_map = read.table("~/work_main/abt6_projects9/tnseq/data/connectome_data/ecoli_DH10B_K12/k12_dir/kei_k12_blast.out", header=F)
+uniprot = read.table("~/work_main/abt6_projects9/tnseq/data/connectome_data/ecoli_DH10B_K12/uniprot-yourlist%3AM20180705A7434721E10EE6586998A056CCD0537E83122FW.tab", sep="\t", header=T)
+
+
+colnames(locus_map)[c(1,3)]=c("locusID", "uniprot_ID")
+locus_map$locusID = gsub( "Keio:", "", locus_map$locusID)
+fus_val_neg1 = merge(fus_val_neg1, locus_map)
+fus_val_neg1 = merge(fus_val_neg1, uniprot, by.x = "uniprot_ID", by.y = "Entry")
+
+
+
