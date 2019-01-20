@@ -29,3 +29,4 @@ NC_004347_fit_organism_MR1.txt.amended.txt filter=lfs diff=lfs merge=lfs -text
 NC_017506_fit_organism_Marino.txt.amended.txt filter=lfs diff=lfs merge=lfs -text
 NZ_CP007637_fit_organism_WCS417.txt.amended.txt filter=lfs diff=lfs merge=lfs -text
 NZ_JIBD01000001_fit_organism_Dyella79.txt.amended.txt filter=lfs diff=lfs merge=lfs -text
+full_tag_dict_file.cpk filter=lfs diff=lfs merge=lfs -text
