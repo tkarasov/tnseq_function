@@ -5,8 +5,20 @@ Association between sequence homology and functional similarity
 This directory contains scripts for processing the datatables from JGI and output from panX.
 
 #### compare_gammproteobacteria.py
-This script takes in the fitness tables, and the geneCluster.json output by panX. It outputs the gammaproteobacteria_mappings.txt (seen in fitness_tables directory) which maps gene_id in panx to all correpsonding orthologs. The script then builds the full_tag_dict_file.cpk dictionary (takes too long). Finally, **the script produces the plots that compare sequence divergence to correlation in fitness values between orthologs**.
+This script takes in the fitness tables, and the geneCluster.json output by panX. It outputs the gammaproteobacteria_mappings.txt (seen in fitness_tables directory) which maps gene_id in panx to all correpsonding orthologs. The output from this script connects the fitness data with the panX data. 
+The script then builds the full_tag_dict_file.cpk dictionary (takes too long). Finally, **the script produces the plots that compare sequence divergence to correlation in fitness values between orthologs**.
 
+#### pan_genome_stats_step2.py
+Build fitness object which is then output into tnseq_panx_fitness_data.cpk that has the diversity statistics for an orthology cluster
+
+#### pan_genome_anc_reconstruction_step3.py
+Script that uses tidbits of code from panX to calculate the number of times genes were gained and lost along the tree
+
+#### deprecated scripts
+map_tnseq_pangenome.py: trying to map gene ids between JGI fitness tables and genomes via blast
+tnseq_fitness_class_pan_genome_stats_step3.py: 
+master_script_tnseq_pipeline.py: Old pipeline for processing bad mappings
+co_occur_step4.py: Looking at correlated co-occurence data. This analysis was essentially scooped in the Nature manuscript.
 
 
 ## fitness_tables directory
