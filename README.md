@@ -4,6 +4,11 @@ Association between sequence homology and functional similarity
 ## code directory
 This directory contains scripts for processing the datatables from JGI and output from panX.
 
+#### compare_gammproteobacteria.py
+This script takes in the fitness tables, and the geneCluster.json output by panX. It outputs the gammaproteobacteria_mappings.txt (seen in fitness_tables directory) which maps gene_id in panx to all correpsonding orthologs. The script then builds the full_tag_dict_file.cpk dictionary (takes too long). Finally, **the script produces the plots that compare sequence divergence to correlation in fitness values between orthologs**.
+
+
+
 ## fitness_tables directory
 This directory contains JGI generated datasets on the tnseq fitness values in different host species and environments. When conducting experiments, JGI gave each selection experiment a set number. In each fitness dataset, a condition is referred to both by its set number and a short description of the condition. This description is not detailed, however. The full description can be found in the file all_conditions.txt.
 
