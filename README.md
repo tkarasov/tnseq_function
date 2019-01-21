@@ -28,7 +28,7 @@ This directory contains JGI generated datasets on the tnseq fitness values in di
 Full description of conditions in which tnseq experiment was conducted
 
 #### full_tag_dict_file.cpk:
-This pickled dictionary has the key of (set number (which is the experiment), Gene Cluster ) and value of the fitness value of the gene cluster in a given experiment. With this file, one call pull the fitness value for a given gene cluster across every experiment in which that gene cluster was present. 
+In this pickled list of lists the first element of a row is a tuple (set number (which is the experiment), Gene Cluster ) and the second element is the fitness value of the gene cluster in a given experiment. With this file, one call pull the fitness value for a given gene cluster across every experiment in which that gene cluster was present. 
 
 #### gamma_proteobacteria_mappings.txt
 This file identifies the gene ids for the genes assigned to a gene cluster in panX. This was a central issue in analyzing the data. The gene ids in the JGI datasets were different from the gene ids in the full genomes. I must look up which script I used to make these mappings.
