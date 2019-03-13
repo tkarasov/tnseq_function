@@ -32,7 +32,7 @@ def give_shared(conditions):
 
 
 def calc_corr_within(shared, full_tag_pd):
-    '''Calculate covariance between fitness of same gene in 'same condition'''
+    '''Calculate covariance between fitness of same gene in "same condition"'''
     #full covariance matrix
     cov_pd = full_tag_pd_centered.astype(float).cov()
     cov_dict = {}
@@ -96,4 +96,4 @@ shared = give_shared(conditions)
 group_dict = calc_corr_within(shared, full_tag_pd_centered)
 cov_normalized = correct_large_matrix(group_dict, full_tag_pd_centered)
 
-cov_normalized.to_csv("/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/cov_normalized_tag_dict_file.csv")
+cov_normalized.to_csv("/ebio/abt6_projects9/tnseq/tnseq_function/fitness_datasets/fitness_tables/cov_normalized_tag_dict_file.csv")
