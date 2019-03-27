@@ -17,7 +17,7 @@ full_tag_pd = pd.read_csv('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitn
 full_tag_pd_centered = full_tag_pd.apply(lambda x: x-x.mean())/full_tag_pd.std()
 
 
-def give_shared(conditions):
+def give_shared_cond(conditions):
     '''Find experiments in which the same organism was measured in the same condition more than once'''
     shared = {}
     for strain in set(conditions['Organism']):
@@ -30,6 +30,18 @@ def give_shared(conditions):
                 pass
     return shared
 
+def give_shared_descr(conditions):
+    '''Find experiments in which the same organism was measured in the same condition more than once'''
+    shared = {}
+    for strain in set(conditions['Organism']):
+        for description in set(conditions['Description']):
+            subset=[]
+            subset=conditions.loc[(conditions['Organism'] == strain) & (conditions['Description'] == description)]
+            if len(subset)>1:
+                shared["_".join((strain+"__"+str(description)).split(" "))] = list(subset.Name)
+            else:
+                pass
+    return shared
 
 def calc_corr_within(shared, full_tag_pd):
     '''Calculate covariance between fitness of same gene in "same condition"'''
@@ -58,7 +70,7 @@ def calc_corr_within(shared, full_tag_pd):
     return group_dict
 
 def correct_large_matrix(group_dict, full_tag_pd_centered):
-'''this function takes the max covariance observed within a condition replicate group, and calculates cov(xa, xb)/sqrt(rho_a^2*rho_b^2). I am unhappy with this matrix however, as there are many values that exceed unity. This likely means that there are conditions that have better correlations than the replicate condition itself. What do we do with this?'''
+    '''this function takes the max covariance observed within a condition replicate group, and calculates cov(xa, xb)/sqrt(rho_a^2*rho_b^2). I am unhappy with this matrix however, as there are many values that exceed unity. This likely means that there are conditions that have better correlations than the replicate condition itself. What do we do with this?'''
     cov_pd = full_tag_pd_centered.astype(float).cov()
     cov_normalized=pd.DataFrame(columns=[rec for rec in group_dict.keys() if rec in cov_pd.index], index=[rec for rec in group_dict.keys() if rec in cov_pd.index])
     for col in cov_normalized.columns:
@@ -89,11 +101,11 @@ def correct_large_matrix(group_dict, full_tag_pd_centered):
 
 
 
-
-
 #1424 conditions have some repetition
-shared = give_shared(conditions)
+shared = give_shared_cond(conditions)
+shared_desc = give_shared_descr(conditions)
 group_dict = calc_corr_within(shared, full_tag_pd_centered)
+group_dict_desc = calc_corr_within(shared_desc, full_tag_pd_centered)
 cov_normalized = correct_large_matrix(group_dict, full_tag_pd_centered)
-
+cov_normalized_desc = correct_large_matrix(group_dict_desc, full_tag_pd_centered)
 cov_normalized.to_csv("/ebio/abt6_projects9/tnseq/tnseq_function/fitness_datasets/fitness_tables/cov_normalized_tag_dict_file.csv")

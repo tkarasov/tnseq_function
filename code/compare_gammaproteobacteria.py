@@ -37,14 +37,14 @@ def prepare_tag_file():
         for rec in line[3:]:
             tag_cluster["-".join(rec.split("_", 2)[2:3])] = line[1]
 
-    # build a dictionary for all locus_tag to set mapping. This takes more than an hour
+    # build a dictionary for all locus_tag to set mapping. This takes more than an hour. I originally had a problem because the set names were used more than once
     file_names = os.listdir("/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/")
     full_tag_dict = {}
     for file in file_names:
         if "fit" in file and "amended" in file:
             full_tag_dict = process_tag_file(file, full_tag_dict, tag_cluster)
     #(pd.DataFrame.from_dict(data=full_tag_dict, orient='index').to_csv('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.csv', header=False))
-    with open('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.cpk', "wb") as file:
+    with open('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file_273_2019.cpk', "wb") as file:
         file.write(pickle.dumps(full_tag_dict))
 
 
@@ -57,9 +57,11 @@ def process_tag_file(file, tag_dict, tag_cluster):
             if 'set' in condition:
                 try:
                     if type(file_in[condition][locus]) == numpy.float64:
-                        # there is a problem here. Some loci have pandas series while others floats. I mus tgo back to determine why
-                        tag_dict[(condition.split(" ")[0], tag_cluster[locus])] = file_in[condition][locus]
+                        # there is a problem here. Some loci have pandas series while others floats. I mustgo back to determine why
+                        #tag_dict[(condition.split(" ")[0], tag_cluster[locus])] = file_in[condition][locus] ***this was changed 3/26/2019. I think this is what caused bad overlap
+                        tag_dict[(condition, tag_cluster[locus])] = file_in[condition][locus]
                         # issue with N515DRAFT in addition ot several others
+                        print(locus)
                         print(1)
                 except KeyError:
                     print(locus)

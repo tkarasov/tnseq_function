@@ -120,7 +120,7 @@ tnseq_genome = "organism_Keio.faa"#GCF_000482265.1_EC_K12_MG1655_Broad_SNP_prote
 #blast tnseq genome against ortholog group library
 blast_tnseq_panxdb(tnseq_genome)
 
-#filter blast results based of identity criteria:
+#filter blast results based on identity criteria:
 locus_tag = rename_blast_results()
 pass_filter=filter_blast_results(80, 0.8, locus_tag)
 

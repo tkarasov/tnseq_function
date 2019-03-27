@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 '''the goal of this script is to do ancestral state reconstruction of the loss and gain of genes along the provided phylogenetic tree'''
 import os,sys,copy;import numpy as np
@@ -16,7 +16,8 @@ from Bio import Phylo, AlignIO
 
 
 #path_to_pangenome_dir='/ebio/ag-neher/share/users/wding/panX-refseq/data/Pseudomonadales'#sys.argv[1]
-path_to_pangenome_dir='/ebio/ag-neher/share/users/wding/panX-refseq/data/Enterobacteriales/'
+path_to_pangenome_dir='/ebio/abt6_projects9/tnseq/wdata/panX-tnseq/data/Gammaproteobacteria/'
+#path_to_pangenome_dir='/ebio/ag-neher/share/users/wding/panX-refseq/data/Enterobacteriales/'
 #t = path_to_pangenome_dir + '/vis/strain_tree.nwk'
 
 def infer_gene_gain_loss(path, rates = [1.0, 1.0]):
@@ -33,7 +34,7 @@ def infer_gene_gain_loss(path, rates = [1.0, 1.0]):
     #root_dir = os.path.dirname(os.path.realpath(__file__))
 
     # define file names for pseudo alignment of presence/absence patterns as in 001001010110
-    path_to_pangenome_dir='/ebio/ag-neher/share/users/wding/panX-refseq/data/Enterobacteriales/'
+    #path_to_pangenome_dir='/ebio/ag-neher/share/users/wding/panX-refseq/data/Enterobacteriales/'
     #path_to_pangenome_dir='/ebio/ag-neher/share/users/wding/panX-refseq/data/Pseudomonadales'#sys.argv[1]
     nwk=path_to_pangenome_dir+"/vis/strain_tree.nwk"
     fasta=path_to_pangenome_dir+"/geneCluster/genePresence.aln"

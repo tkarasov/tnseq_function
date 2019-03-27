@@ -28,7 +28,7 @@ def getGC(seq):
 
 
 #path_to_pangenome_dir = '/ebio/ag-neher/share/users/wding/panX-refseq/data/Pseudomonadales'#sys.argv[1]
-path_to_pangenome_dir='/ebio/ag-neher/share/users/wding/panX-refseq/data/Enterobacteriales/'
+path_to_pangenome_dir='/ebio/abt6_projects9/tnseq/wdata/panX-tnseq/data/Gammaproteobacteria/'
 clusters = path_to_pangenome_dir + "/allclusters_final.tsv"
 #tnseq_genome = list(SeqIO.parse(os.popen("ls | grep _cds_from_genomic.fna").read().strip(), "fasta"))
 
@@ -55,7 +55,7 @@ for key,value in tnseq_panx.iteritems():
 	try:
 		tnid = key.split(":")[1]
 	except IndexError:
-		print "ERROR"
+		print("ERROR")
 		tnid=tnseq_panx[key][0].split("_")[2]
 	pgid = value[0]
 	pggc = value[1]
@@ -72,6 +72,6 @@ fit['gene_ev'] = [tnseq_stats[rec].gene_ev for rec in fit.index]
 fit['gene_div'] = [tnseq_stats[rec].gene_div for rec in fit.index]
 
 
-with open("tnseq_panx_fitness_data.cpk", 'wb') as handle:
+with open("/ebio/abt6_projects9/tnseq/tnseq_function/data/tnseq_panx_fitness_data.cpk", 'wb') as handle:
 	pickle.dump(fit, handle)
 
