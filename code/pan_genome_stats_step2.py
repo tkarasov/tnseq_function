@@ -32,15 +32,18 @@ path_to_pangenome_dir='/ebio/abt6_projects9/tnseq/wdata/panX-tnseq/data/Gammapro
 clusters = path_to_pangenome_dir + "/allclusters_final.tsv"
 #tnseq_genome = list(SeqIO.parse(os.popen("ls | grep _cds_from_genomic.fna").read().strip(), "fasta"))
 
-tnseq_panx = pickle.load(open("tnseq_panx_mapped_dict.cpk", 'rb'))
+#tnseq_panx = pickle.load(open("tnseq_panx_mapped_dict.cpk", 'rb')) '''I think this is the deprecated mapping'''
+tnseq_panx = [line.strip().split() for line in open("/ebio/abt6_projects9/tnseq/tnseq_function/fitness_tables/gammaproteobacteria_mappings.txt").readlines()]
+
+
 
 #Nucleotide diversity of gene
-genediv = pickle.load(open(path_to_pangenome_dir+"/geneCluster/gene_diversity.cpk", 'rb'))
+genediv = pickle.load(open(path_to_pangenome_dir+"/geneClusterx/gene_diversity.cpk", 'rb'))
 
 #GC content
 
 #Deletion/Duplication events pickle.load(open(path_to_pangenome_dir+"/geneCluster/dt_geneEvents.cpk"))
-gene_events = pickle.load(open(path_to_pangenome_dir + "/geneCluster/dt_geneEvents.cpk", 'rb'))
+gene_events = pickle.load(open(path_to_pangenome_dir + "/geneClusterx/dt_geneEvents.cpk", 'rb'))
 
 #time_spent in tree
 ts_tree = pickle.load(open("branch_gene.cpk", 'rb'))

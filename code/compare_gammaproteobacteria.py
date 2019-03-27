@@ -1,7 +1,7 @@
 
 '''the goal of this script is to take the gammaproteobacteria output from panx
 and to look at the relationship between divergence and the correlation of the
-phenotype. Should be used to process the output of script that processes blast output'''
+phenotype. Should be used to process the output of script that processes blast output or actually for the panX output overall'''
 import json
 import os
 import pandas as pd
@@ -44,7 +44,7 @@ def prepare_tag_file():
         if "fit" in file and "amended" in file:
             full_tag_dict = process_tag_file(file, full_tag_dict, tag_cluster)
     #(pd.DataFrame.from_dict(data=full_tag_dict, orient='index').to_csv('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.csv', header=False))
-    with open('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file_273_2019.cpk', "wb") as file:
+    with open('/ebio/abt6_projects9/tnseq/tnseq_function/data/full_tag_dict_file_273_2019.cpk', "wb") as file:
         file.write(pickle.dumps(full_tag_dict))
 
 
@@ -111,10 +111,11 @@ def pairwise_condition(pairwise_divergence, condition_corr):
     return(keep_pairwise, keep_mat)
 
 # Assuming we have previously run prepare_tag_file(), we just need to read in the output
-full_tag_dict = pickle.load(open('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.cpk', 'rb'))
+full_tag_dict = pickle.load(open('/ebio/abt6_projects9/tnseq/tnseq_function/data/full_tag_dict_file_273_2019.cpk', 'rb'))
+#'/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.cpk', 'rb'))
 
-genome_id = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/data/pan_genome_datasets/genome_list.txt").readlines()]
-conditions = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/data/fitness_datasets/all_conditions.txt")]
+genome_id = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/tnseq_function/data/genome_list.txt").readlines()]
+conditions = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/tnseq_function/data/all_conditions.txt")]
 conditions_dict = {}
 id_dict = {line[-1]: line[0] for line in genome_id}
 for line in conditions:

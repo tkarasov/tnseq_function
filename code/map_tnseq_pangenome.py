@@ -125,7 +125,7 @@ locus_tag = rename_blast_results()
 pass_filter=filter_blast_results(80, 0.8, locus_tag)
 
 #output file mapping tnseq gene (first column) to ortholog group assignment
-with open("tnseq_pangenome_map.cpk", 'wb') as handle:
+with open("/ebio/abt6_projects9/tnseq/tnseq_function/data/tnseq_pangenome_map.cpk", 'wb') as handle:
     pickle.dump(pass_filter, handle)
 
 #list of every ortholog, the genes assigned to that orthology group and the gene number
@@ -148,7 +148,7 @@ for key,value in pass_filter.iteritems():
 
 
 #output dictionary that has every tnseq result and the corresponding gene cluster
-with open("tnseq_panx_mapped_dict.cpk", 'wb') as handle:
+with open("/ebio/abt6_projects9/tnseq/tnseq_function/data/tnseq_panx_mapped_dict.cpk", 'wb') as handle:
     pickle.dump(panx_gene_identifier, handle)
 
 
