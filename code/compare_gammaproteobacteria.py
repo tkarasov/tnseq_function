@@ -7,10 +7,11 @@ import os
 import pandas as pd
 from Bio import SeqIO
 import pickle
-import numpy
-from matplotlib import pyplot as plt
+import numpy as np
+from scipy import stats
 import matplotlib
 matplotlib.use('Agg')
+from matplotlib import pyplot as plt
 
 
 def prepare_tag_file():
@@ -52,14 +53,16 @@ def process_tag_file(file, tag_dict, tag_cluster):
     # this function processes the tag_file to add to the dictionary
     file_in = pd.read_csv(file)
     file_in.index = file_in['locusID']
+    organism = list(file_in['orgID'])[0]
     for locus in file_in['locusID']:
         for condition in file_in.columns:
             if 'set' in condition:
                 try:
                     if type(file_in[condition][locus]) == numpy.float64:
                         # there is a problem here. Some loci have pandas series while others floats. I mustgo back to determine why
-                        #tag_dict[(condition.split(" ")[0], tag_cluster[locus])] = file_in[condition][locus] ***this was changed 3/26/2019. I think this is what caused bad overlap
-                        tag_dict[(condition, tag_cluster[locus])] = file_in[condition][locus]
+                        # tag_dict[(condition.split(" ")[0], tag_cluster[locus])] = file_in[condition][locus] ***this was changed 3/26/2019. I think this is what caused bad overlap
+                        new_cond = condition.split()[0]
+                        tag_dict[(new_cond, organism, tag_cluster[locus])] = file_in[condition][locus]
                         # issue with N515DRAFT in addition ot several others
                         print(locus)
                         print(1)
@@ -72,7 +75,10 @@ def process_tag_file(file, tag_dict, tag_cluster):
 
 def choose_condition(conditions_table, condition, full_tag_dict):
     focal_condition = [rec for rec in conditions_table if condition in rec[-1]]
-    keep_condition = [rec for rec in focal_condition if rec[0] in [line[-1] for line in genome_id]]
+
+    # keep only gammaproteobacteria under consideration
+    keep_condition = [rec for rec in focal_condition if rec[0] in [line[1] for line in genome_id]]
+
     # now build dataframe with set as index and locus as column
     full_tag_subset = {k: v for k, v in full_tag_dict.items() if k[0] in [line[1] for line in keep_condition]}
     condition_df = pd.DataFrame(columns=set([line[1] for line in full_tag_subset.keys()]), index=set([line[0] for line in full_tag_subset.keys()]))
@@ -80,11 +86,13 @@ def choose_condition(conditions_table, condition, full_tag_dict):
         condition_df[v][k] = full_tag_subset[(k, v)].astype(float)
     return condition_df.T.astype(float)
 
+
 def pd_fill_diagonal(df_matrix, value=0):
     mat = df_matrix.values
     n = mat.shape[0]
     mat[range(n), range(n)] = value
     return pd.DataFrame(mat)
+
 
 def calculate_divergence_genomes():
     # this takes the SNP matrix from panx and calculates a divergence matrix
@@ -99,23 +107,25 @@ def calculate_divergence_genomes():
             pairwise_divergence[n1][n2] = dist
     return pairwise_divergence
 
+
 def pairwise_condition(pairwise_divergence, condition_corr):
     genomes = [conditions_dict[rec][0].strip(".gbk") for rec in condition_corr.corr()]
     present = map(lambda x: x in pairwise_divergence.columns, genomes)
     keep_conditions = list(filter(lambda x: conditions_dict[x][0].strip(".gbk") in pairwise_divergence.columns, condition_corr.corr()))
     keep_mat = condition_corr.corr()[keep_conditions].loc[keep_conditions]
     keep_pairwise = pairwise_divergence[[conditions_dict[rec][0].strip(".gbk") for rec in keep_mat]].loc[[conditions_dict[rec][0].strip(".gbk") for rec in keep_mat]]
-    #assign NA to diagonals
+    # assign NA to diagonals
     keep_mat = pd_fill_diagonal(keep_mat, numpy.nan)
     keep_pairwise = pd_fill_diagonal(keep_pairwise, numpy.nan)
     return(keep_pairwise, keep_mat)
+
 
 # Assuming we have previously run prepare_tag_file(), we just need to read in the output
 full_tag_dict = pickle.load(open('/ebio/abt6_projects9/tnseq/tnseq_function/data/full_tag_dict_file_273_2019.cpk', 'rb'))
 #'/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.cpk', 'rb'))
 
 genome_id = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/tnseq_function/data/genome_list.txt").readlines()]
-conditions = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/tnseq_function/data/all_conditions.txt")]
+conditions = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/tnseq_function/fitness_tables/all_conditions_amended.txt")]
 conditions_dict = {}
 id_dict = {line[-1]: line[0] for line in genome_id}
 for line in conditions:
@@ -145,68 +155,68 @@ x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-ax1.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+ax1.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 ax1.set_xlabel("% Sequence Divergence")
 ax1.set_ylabel("Pearson Correlation Coefficient (R)")
 ax1.set_title("Tetracycline")
 
 
-plt.subplot(232, sharex = ax1, sharey = ax1)
+plt.subplot(232, sharex=ax1, sharey=ax1)
 x, y = pairwise_condition(pairwise_divergence, gentamicin)
-plt.scatter(x,y)
+plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 #ax2.xlabel("% Sequence Divergence")
 #ax2.ylabel("Pearson Correlation Coefficient (R)")
 plt.title("Gentamicin")
 
-plt.subplot(2,3,3, sharex = ax1, sharey = ax1)
+plt.subplot(2, 3, 3, sharex=ax1, sharey=ax1)
 fin_pair, spec_pair = pairwise_condition(pairwise_divergence, spec)
 plt.scatter(fin_pair, spec_pair)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 plt.title("Spectinomycin")
 
-plt.subplot(2,3,4)
-x,y = pairwise_condition(pairwise_divergence, Doxycycline)
+plt.subplot(2, 3, 4)
+x, y = pairwise_condition(pairwise_divergence, Doxycycline)
 plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 plt.title("Doxycycline")
 
-plt.subplot(2,3,5)
+plt.subplot(2, 3, 5)
 x, y = pairwise_condition(pairwise_divergence, nalidixic)
 plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 plt.title("Nalidixic acid")
 
-plt.subplot(2,3,6)
-x,y = pairwise_condition(pairwise_divergence, Bacitracin)
+plt.subplot(2, 3, 6)
+x, y = pairwise_condition(pairwise_divergence, Bacitracin)
 plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 plt.title("Bacitracin")
 
 plt.tight_layout()
@@ -221,7 +231,7 @@ LAlanine = choose_condition(conditions, "L-Alanine", full_tag_dict)
 
 fig = plt.figure(figsize=(16, 12))
 ax1 = plt.subplot(231)
-x,y = pairwise_condition(pairwise_divergence, Lserine)
+x, y = pairwise_condition(pairwise_divergence, Lserine)
 ax1.scatter(x, y)
 ax1.set_xlabel("% Sequence Divergence")
 ax1.set_ylabel("Pearson Correlation Coefficient (R)")
@@ -229,63 +239,63 @@ x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-ax1.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+ax1.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 ax1.set_title("L-serine")
 
-plt.subplot(232, sharex = ax1, sharey = ax1)
-x,y = pairwise_condition(pairwise_divergence, DGlucose)
+plt.subplot(232, sharex=ax1, sharey=ax1)
+x, y = pairwise_condition(pairwise_divergence, DGlucose)
 plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 plt.title("D-Glucose")
 
-plt.subplot(2,3,3, sharex = ax1, sharey = ax1)
-x,y = pairwise_condition(pairwise_divergence, Sucrose)
+plt.subplot(2, 3, 3, sharex=ax1, sharey=ax1)
+x, y = pairwise_condition(pairwise_divergence, Sucrose)
 plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 plt.title("Sucrose")
 
-plt.subplot(2,3,4, sharex = ax1, sharey = ax1)
-x,y = pairwise_condition(pairwise_divergence, LLeucine)
+plt.subplot(2, 3, 4, sharex=ax1, sharey=ax1)
+x, y = pairwise_condition(pairwise_divergence, LLeucine)
 plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))plt.title("L-Leucine")
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))plt.title("L-Leucine")
 
-plt.subplot(2,3,5, sharex = ax1, sharey = ax1)
-x,y = pairwise_condition(pairwise_divergence, DAlanine)
+plt.subplot(2, 3, 5, sharex=ax1, sharey=ax1)
+x, y = pairwise_condition(pairwise_divergence, DAlanine)
 plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 plt.title("D-Alanine")
 
-plt.subplot(2,3,6, sharex = ax1, sharey = ax1)
-x,y = pairwise_condition(pairwise_divergence, LAlanine)
+plt.subplot(2, 3, 6, sharex=ax1, sharey=ax1)
+x, y = pairwise_condition(pairwise_divergence, LAlanine)
 plt.scatter(x, y)
 x_flat = np.array(x).flatten().astype('float32')
 y_flat = np.array(y).flatten().astype('float32')
 mask = ~np.isnan(x_flat) & ~np.isnan(y_flat)
 slope, intercept, r_value, p_value, std_err = stats.linregress(x_flat[mask], y_flat[mask])
-line = slope*x_flat[mask]+intercept
-plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope,intercept))
+line = slope * x_flat[mask] + intercept
+plt.plot(x_flat[mask], line, 'r', label='y={:.2f}x+{:.2f}'.format(slope, intercept))
 plt.title("L-Alanine")
 
 plt.tight_layout()
-plt.savefig("nutrient.pdf")
+plt.savefig("/ebio/abt6_projects9/tnseq/tnseq_function/figs/nutrient.pdf")
