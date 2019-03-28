@@ -11,10 +11,13 @@ conditions = pd.read_csv("/ebio/abt6_projects9/tnseq/tnseq_function/fitness_tabl
 #full_tag_dict = pickle.load(open('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.cpk', 'rb'))
 
 # this is a pandas dataframe with the set (experiment) as the columns and the gene cluster (output from panx) as the row
-full_tag_pd = pd.read_csv('/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.csv', sep="\t", index_col=0)
+full_tag_pd = pd.read_csv('//ebio/abt6_projects9/tnseq/tnseq_function/data/full_tag_pd.csv', sep=",")
 
+full_name = full_tag_pd['Unnamed: 0'] + "_" + full_tag_pd['Unnamed: 1']
+full_tag_pd.index = full_name
+full_tag_new = full_tag_pd.drop(['Unnamed: 0'], axis=1).drop(['Unnamed: 1'], axis=1).transpose()
 # mean centered and divided by standard deviation
-full_tag_pd_centered = full_tag_pd.apply(lambda x: x - x.mean()) / full_tag_pd.std()
+full_tag_pd_centered = full_tag_new.apply(lambda x: x - x.mean()) / full_tag_new.std()
 
 
 def give_shared_cond(conditions):
@@ -47,7 +50,7 @@ def give_shared_descr(conditions):
     return shared
 
 
-def calc_corr_within(shared, full_tag_pd):
+def calc_corr_within(shared, full_tag_pd_centered):
     '''Calculate covariance between fitness of same gene in "same condition"'''
     # full covariance matrix
     cov_pd = full_tag_pd_centered.astype(float).cov()

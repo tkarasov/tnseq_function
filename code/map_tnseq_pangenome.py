@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os,sys,time,csv,glob, pickle, cPickle
 from collections import defaultdict
-from Bio import GenBank
+from Bio import GenBank/Users/tkarasov/work_main/abt6_projects9/tnseq/tnseq_function/code/map_tnseq_pangenome.py
 from Bio import SeqIO
 
 

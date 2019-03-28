@@ -80,10 +80,15 @@ def choose_condition(conditions_table, condition, full_tag_dict):
     keep_condition = [rec for rec in focal_condition if rec[0] in [line[1] for line in genome_id]]
 
     # now build dataframe with set as index and locus as column
-    full_tag_subset = {k: v for k, v in full_tag_dict.items() if k[0] in [line[1] for line in keep_condition]}
-    condition_df = pd.DataFrame(columns=set([line[1] for line in full_tag_subset.keys()]), index=set([line[0] for line in full_tag_subset.keys()]))
-    for k, v in full_tag_subset.keys():
-        condition_df[v][k] = full_tag_subset[(k, v)].astype(float)
+    full_tag_subset = {}
+    for k, v in full_tag_dict.items():
+        if [k[1], k[0]] in [line[0:2] for line in keep_condition]:
+            full_tag_subset[k] = v
+    full_tag_subset = {k: v for k, v in full_tag_dict.items() if [k[1], k[0]] in [line[0:2] for line in keep_condition]}
+    condition_df = pd.DataFrame(columns=set([line[2] for line in full_tag_subset.keys()]), index=set([line[0] + "_" + line[1] for line in full_tag_subset.keys()]))
+    for k, v, x in full_tag_subset.keys():
+        print(k, v, x)
+        condition_df[x][k + v] = full_tag_subset[(k, v, x)].astype(float)
     return condition_df.T.astype(float)
 
 
@@ -109,7 +114,7 @@ def calculate_divergence_genomes():
 
 
 def pairwise_condition(pairwise_divergence, condition_corr):
-    genomes = [conditions_dict[rec][0].strip(".gbk") for rec in condition_corr.corr()]
+    genomes = [conditions_dict[rec][0] for rec in condition_corr.corr()]  # [conditions_dict[rec][0].strip(".gbk") for rec in condition_corr.corr()]
     present = map(lambda x: x in pairwise_divergence.columns, genomes)
     keep_conditions = list(filter(lambda x: conditions_dict[x][0].strip(".gbk") in pairwise_divergence.columns, condition_corr.corr()))
     keep_mat = condition_corr.corr()[keep_conditions].loc[keep_conditions]
@@ -120,18 +125,31 @@ def pairwise_condition(pairwise_divergence, condition_corr):
     return(keep_pairwise, keep_mat)
 
 
-# Assuming we have previously run prepare_tag_file(), we just need to read in the output
+# Assuming we have previously run prepare_tag_file(), we just need to read in the output otherwise: prepare_tag_file()
 full_tag_dict = pickle.load(open('/ebio/abt6_projects9/tnseq/tnseq_function/data/full_tag_dict_file_273_2019.cpk', 'rb'))
+
+# generate pandas dataframe of the tag_dict. This takes a long time!
+#my_index = set([(k[0], k[1]) for k in list(full_tag_dict.keys())])
+#my_col = set([k[2] for k in list(full_tag_dict.keys())])
+#full_tag_pd = pd.DataFrame(index=my_index, columns=my_col)
+# for rec in list(full_tag_dict.items()):
+#    ind = rec[0][0:2]
+#    col = rec[0][2]
+#   full_tag_pd[col].loc[ind] = rec[1]
+
+# full_tag_pd.to_csv("/ebio/abt6_projects9/tnseq/tnseq_function/data/full_tag_pd.csv")
+
 #'/ebio/abt6_projects9/tnseq/data/fitness_datasets/fitness_tables/full_tag_dict_file.cpk', 'rb'))
 
 genome_id = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/tnseq_function/data/genome_list.txt").readlines()]
 conditions = [line.strip().split('\t') for line in open("/ebio/abt6_projects9/tnseq/tnseq_function/fitness_tables/all_conditions_amended.txt")]
 conditions_dict = {}
-id_dict = {line[-1]: line[0] for line in genome_id}
+id_dict = {line[1]: line[0] for line in genome_id}
 for line in conditions:
     if len(line) > 1:
         try:
-            conditions_dict[line[1]] = [id_dict[line[0]], line[-1]]
+            print(line[1] + "_" + id_dict[line[0]])
+            conditions_dict[line[1] + "_" + line[0]] = [id_dict[line[0]], line[-1]]
         except KeyError:
             conditions_dict[line[1]] = [line[0], line[-1]]
 
