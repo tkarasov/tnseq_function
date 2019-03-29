@@ -28,7 +28,8 @@ def give_shared_cond(conditions):
             subset = []
             subset = conditions.loc[(conditions['Organism'] == strain) & (conditions['Condition'] == condition)]
             if len(subset) > 1:
-                shared["_".join((strain + "__" + str(condition)).split(" "))] = [(strain, rec) for rec in list(subset.Name)]
+                shared["_".join((strain + "_" + str(condition)).split(" "))] = [rec + "_" + strain for rec in list(subset.Name)]
+                #shared["_".join((strain + "_" + str(condition)).split(" "))] = [(strain, rec) for rec in list(subset.Name)]
                 #shared["_".join((strain + "__" + str(condition)).split(" "))] = list(subset.Name)
             else:
                 pass
@@ -66,7 +67,9 @@ def calc_corr_within(shared, full_tag_pd_centered):
                 temp.append(cov_pd[group[i]].loc[group[z]])
                 print("success")
             except KeyError:
-                print(group[i])
+                print("Error in group")
+                # errror here for ~200 paired conditions
+                # print(group[i])
             i = i + 1
             z = z + 1
         if len(temp) > 0:
@@ -113,7 +116,7 @@ def correct_large_matrix(group_dict, full_tag_pd_centered):
 shared = give_shared_cond(conditions)
 shared_desc = give_shared_descr(conditions)
 group_dict = calc_corr_within(shared, full_tag_pd_centered)
-group_dict_desc = calc_corr_within(shared_desc, full_tag_pd_centered)
+# group_dict_desc = calc_corr_within(shared_desc, full_tag_pd_centered) too few conditions
 cov_normalized = correct_large_matrix(group_dict, full_tag_pd_centered)
-cov_normalized_desc = correct_large_matrix(group_dict_desc, full_tag_pd_centered)
-cov_normalized.to_csv("/ebio/abt6_projects9/tnseq/tnseq_function/fitness_datasets/fitness_tables/cov_normalized_tag_dict_file.csv")
+# cov_normalized_desc = correct_large_matrix(group_dict_desc, full_tag_pd_centered) too few conditions
+cov_normalized.to_csv("/ebio/abt6_projects9/tnseq/tnseq_function/fitness_tables/cov_normalized_tag_dict_file.csv")
