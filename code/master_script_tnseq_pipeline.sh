@@ -4,19 +4,19 @@
 
 #performs anc reconstruction to infer events. Need output from panX
 #3.28.2019 works fine
-python pan_genome_anc_reconstruction_step3.py
+python pan_genome_anc_reconstruction_step1.py
 
 #This next script takes output from panX and the fitness tables. It builds a large dictionary of (locus_id, condition):fitness_value mappings
 #3.28.2019 Works fine. Builds full_tag_dict and can make figures on divergence vs. fitness correlation
-python compare_gammaproteobacteria.py
+python compare_gammaproteobacteria_step2.py
 
 #creates tnseq gene object with attributes. 
-python pan_genome_stats_step2.py
+python pan_genome_stats_step3.py
 
 #statistical analysis with fitness data and gene attributes. Need fitness + panX
-python tnseq_fitness_class_pan_genome_stats_step3.py
+python tnseq_fitness_class_pan_genome_stats_step4.py
 
-#compare the covariance of replicates to related environments. Working on 29.3.2019 but the convariance matrix can exceed 1.
+#compare the covariance of replicates to related environments. Working on 29.3.2019 but the convariance matrix can exceed 1.m
 python variance_same_different.py
 
 
