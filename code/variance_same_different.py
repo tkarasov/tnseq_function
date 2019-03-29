@@ -112,7 +112,7 @@ def correct_large_matrix(group_dict, full_tag_pd_centered):
 
 
 
-# 1424 conditions have some repetition
+# 1424 conditions have some repetition. But....only about 800 of them seem to be recognized in the creation of group_dict. Need to figure out why this is. Seems something wrong with Dylella and only Pseudomonas showing up.
 shared = give_shared_cond(conditions)
 shared_desc = give_shared_descr(conditions)
 group_dict = calc_corr_within(shared, full_tag_pd_centered)

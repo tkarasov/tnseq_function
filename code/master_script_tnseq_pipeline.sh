@@ -16,7 +16,7 @@ python pan_genome_stats_step2.py
 #statistical analysis with fitness data and gene attributes. Need fitness + panX
 python tnseq_fitness_class_pan_genome_stats_step3.py
 
-#compare the covariance of replicates to related environments
+#compare the covariance of replicates to related environments. Working on 29.3.2019 but the convariance matrix can exceed 1.
 python variance_same_different.py
 
 
