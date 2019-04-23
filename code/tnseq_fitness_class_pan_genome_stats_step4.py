@@ -9,6 +9,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import sem
+import statsmodels.api as sm
+lowess = sm.nonparametric.lowess
 
 # This function takes an array of numbers and smoothes them out.
 # Smoothing is useful for making plots a little easier to read.
@@ -56,15 +58,15 @@ full = pd.DataFrame({'x': x, 'y': y}, dtype=np.float64)
 # plt.scatter(x, y)
 # ys = lowess(x, y)
 fig = plt.figure()
-# sns.lmplot("x", "y", data=full, line_kws={'color': 'red'})
-sns.regplot(x, y, scatter_kws={"color": "black", 's': .2}, x_bins=20, line_kws={"color": "red"}, lowess=True)
-# time.set_xlim(0,)
-# time_fig = time.get_figure()
+g = sns.regplot(x, y, line_kws={"color": "red"}, lowess=True, scatter_kws={"color": "black", 's': .2}, frac=0.1)
+g.set(ylim=(-.1, .05))
+g.set(xlabel='Time in tree', ylabel='Average fitness')
+g
 fig.savefig(save_path + "ave_fitness_ttree.pdf")
 fig.clf()
 
 
-# graph the relationship between time in tree and average fitness across all environment in every genome
+# graph the relationship between genetic diversity and fitness across all environment in every genome
 x = numpy.array(Genetic_Diversity)
 y = numpy.array(fit_mean)
 full = pd.DataFrame({'x': x, 'y': y})
@@ -87,15 +89,15 @@ y = numpy.array(fit_mean)
 full = pd.DataFrame({'x': x, 'y': y})
 # fig = plt.figure()
 # sns.regplot(x, y, fit_reg=False, x_ci='sd', scatter_kws={"color": "black", 's': .4}, x_estimator=np.mean)
-fig = sns.catplot(x, y, kind="point", data=full, color="red", ci=95)
-fig.set_axis_labels('Number of gains/losses', 'Average fitness')
-# scatter_kws={"color": "black", 's': .4}, x_estimator=np.mean)
-# sns.lmplot(x="size", y="tip", data=tips, x_estimator=np.mean);
-# gain.set_xlim(0,)
-# gain_fig = gain.get_figure()
-fig.savefig(save_path + "ave_fitness_num_events.pdf")
 
-# graph the relationship between number of gene gains and losses and Variance in fitness across all environment in every genome
+#fig, (ax1, ax2) = plt.subplots(ncols=2, sharey=True)
+fig1 = sns.catplot(x, y, kind="point", data=full, color="red", ci=95)
+fig1.set_axis_labels('Number of gains/losses', 'Average fitness')
+fig1
+fig1.savefig(save_path + "ave_fitness_num_events.pdf")
+plt.clf()
+
+# graph the relationship between number of gene gains and losses and variance in fitness across all environments in every genome
 x = numpy.array(num_gene_events)
 y = numpy.array(fit_var)
 # plt.scatter(x, y)
@@ -103,14 +105,12 @@ y = numpy.array(fit_var)
 full = pd.DataFrame({'x': x, 'y': y})
 # fig = plt.figure()
 # sns.regplot(x, y, fit_reg=False, x_ci='sd', scatter_kws={"color": "black", 's': .4}, x_estimator=np.mean)
-fig = sns.catplot(x, y, kind="point", data=full, color="red", ci=95)
-fig.set_axis_labels('Number of gains/losses', 'Variance in fitness across hosts and environments')
-# scatter_kws={"color": "black", 's': .4}, x_estimator=np.mean)
-# sns.lmplot(x="size", y="tip", data=tips, x_estimator=np.mean);
-# gain.set_xlim(0,)
-# gain_fig = gain.get_figure()
-fig.savefig(save_path + "var_fitness_num_events.pdf")
-
+#plt.subplot(1, 2, 2)
+fig2 = sns.catplot(x, y, kind="point", data=full, color="red", ci=95)
+fig2.set_axis_labels('Number of gains/losses', 'Variance in fitness across hosts and environments')
+fig2
+plt.savefig(save_path + "ave_var_num_events.pdf")
+plt.clf()
 
 # histogram of ages
 plt.clf()
